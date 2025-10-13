@@ -34,8 +34,8 @@ hotels = [
 def get_hotels(
         id: int | None = Query(default=None, description="Название отеля"),
         title: str | None = Query(default=None, description="Название отеля"),
-        page: int | None = Query(default=None),
-        per_page: int | None = Query(default=None)
+        page: int | None = Query(default=1),
+        per_page: int | None = Query(default=3)
 ):
     hotels_ = []
     for hotel in hotels:
@@ -45,13 +45,11 @@ def get_hotels(
             continue
         hotels_.append(hotel)
 
-    if all([page, per_page]):
-        start = per_page * (page - 1)
-        end = per_page * page
 
-        return hotels_[start : end]
+    start = per_page * (page - 1)
+    end = per_page * page
 
-    return hotels_
+    return hotels_[start : end]
 
 
 @router.post("/")
