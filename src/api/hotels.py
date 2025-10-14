@@ -1,8 +1,12 @@
 from fastapi import Query, APIRouter, Body
 from fastapi.openapi.models import Example
 
+from sqlalchemy import insert
+
 from src.api.dependencies import PaginationDep
+from src.database import async_session_maker
 from src.schemas.hotels import Hotel, HotelPATCH
+from src.models.hotels import HotelsOrm
 
 router = APIRouter(prefix="/hotels", tags=["Отели"])
 
@@ -53,31 +57,30 @@ def get_hotels(
 
 
 @router.post("/")
-def create_hotel(
+async def create_hotel(
         hotel_data: Hotel = Body(
             openapi_examples={
                 "1": Example(
                     summary="Сочи",
                     value={
                         "title": "Отель Сочи 5 звезд",
-                        "name": "Отель Сочи"
+                        "location": "ул. Моря 1"
                     }
                 ),
                 "2": Example(
                     summary="Дубай",
                     value={
                         "title": "Отель Дубай у фонтана",
-                        "name": "Отель Дубай"
+                        "location": "ул. Шейха 2"
                     }
                 )
             }
         )
 ):
-    hotels.append({
-        "id": hotels[-1]["id"] + 1,
-        "title": hotel_data.title,
-        "name": hotel_data.name
-    })
+    async with async_session_maker() as session:
+        add_hotel_stmt = insert(HotelsOrm).values(**hotel_data.model_dump())
+        await session.execute(add_hotel_stmt)
+        await session.commit()
 
     return {"satus": "OK"}
 
