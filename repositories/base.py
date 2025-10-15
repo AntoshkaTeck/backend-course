@@ -15,7 +15,12 @@ class BaseRepository:
 
     async def get_one_or_none(self, **filters):
         query = select(self.model).where(**filters)
-
         result = await self.session.execute(query)
 
         return result.scalars().one_or_none()
+
+    async def add(self, model_data):
+        model = self.model(**model_data)
+        self.session.add(model)
+
+        return model
