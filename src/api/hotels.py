@@ -1,13 +1,10 @@
 from fastapi import Query, APIRouter, Body
 from fastapi.openapi.models import Example
 
-from sqlalchemy import insert, select
-
 from repositories.hotels import HotelsRepository
 from src.api.dependencies import PaginationDep
-from src.database import async_session_maker, engine
+from src.database import async_session_maker
 from src.schemas.hotels import Hotel, HotelPATCH
-from src.models.hotels import HotelsOrm
 
 router = APIRouter(prefix="/hotels", tags=["Отели"])
 
@@ -50,38 +47,37 @@ async def create_hotel(
         )
 ):
     async with async_session_maker() as session:
-        hotel = await HotelsRepository(session).add(hotel_data.model_dump())
+        hotel = await HotelsRepository(session).add(hotel_data)
         await session.commit()
 
     return {"satus": "OK", "data": hotel}
 
 
 @router.put("/{hotel_id}")
-def update_hotel(hotel_id: int, hotel_data: Hotel):
-    for hotel in hotels:
-        if hotel["id"] == hotel_id:
-            hotel["title"] = hotel_data.title
-            hotel["name"] = hotel_data.name
+async def update_hotel(hotel_id: int, hotel_data: Hotel):
+    async with async_session_maker() as session:
+        await HotelsRepository(session).update(hotel_data, id=hotel_id)
+        await session.commit()
 
     return {"satus": "OK"}
 
 
 @router.patch("/{hotel_id}")
-def update_hotel_part(
+async def update_hotel_part(
         hotel_id: int,
         hotel_data: HotelPATCH
 ):
-    for hotel in hotels:
-        if hotel["id"] == hotel_id:
-            hotel["title"] = hotel_data.title if hotel_data.title else hotel["title"]
-            hotel["name"] = hotel_data.name if hotel_data.name else hotel["name"]
+    async with async_session_maker() as session:
+        await HotelsRepository(session).update(hotel_data, exclude_unset=True , id=hotel_id)
+        await session.commit()
 
     return {"satus": "OK"}
 
 
 @router.delete("/{hotel_id}")
-def delete_hotel(hotel_id: int):
-    global hotels
-    hotels = [hotel for hotel in hotels if hotel["id"] != hotel_id]
+async def delete_hotel(hotel_id: int):
+    async with async_session_maker() as session:
+        await HotelsRepository(session).delete(id=hotel_id)
+        await session.commit()
 
     return {"satus": "OK"}
