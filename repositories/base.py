@@ -1,9 +1,10 @@
 from pydantic import BaseModel
-from sqlalchemy import select, delete, update
+from sqlalchemy import select, delete, update, insert
 
 
 class BaseRepository:
     model = None
+    schema: BaseModel = None
 
     def __init__(self, session):
         self.session = session
@@ -11,22 +12,25 @@ class BaseRepository:
     async def get_all(self, *args, **kwargs):
         query = select(self.model)
         result = await self.session.execute(query)
-
-        return result.scalars().all()
+        return [self.schema.model_validate(model) for model in result.scalars().all()]
 
     async def get_one_or_none(self, **filter_by):
         query = select(self.model).filter_by(**filter_by)
         result = await self.session.execute(query)
-
-        return result.scalars().one_or_none()
+        model = result.scalars().one_or_none()
+        if model is None:
+            return None
+        return self.schema.model_validate(model)
 
     async def add(self, data: BaseModel):
-        model = self.model(**data.model_dump())
-        self.session.add(model)
+        add_stmt = insert(self.model).values(**data.model_dump()).returning(self.model)
+        result = await self.session.execute(add_stmt)
+        model = result.scalars().one()
+        if model is None:
+            return None
+        return self.schema.model_validate(model)
 
-        return model
-
-    async def update(self, data: BaseModel, exclude_unset: bool = False ,**filter_by):
+    async def update(self, data: BaseModel, exclude_unset: bool = False, **filter_by):
         update_stmt = (
             update(self.model)
             .filter_by(**filter_by)
