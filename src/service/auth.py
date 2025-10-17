@@ -1,4 +1,6 @@
 from datetime import datetime, timezone, timedelta
+
+from fastapi import HTTPException
 from pwdlib import PasswordHash
 import jwt
 
@@ -20,3 +22,9 @@ class AuthService:
 
     def hash_password(self, password: str) -> str:
         return self.password_hash.hash(password)
+
+    def decode_token(self, token: str) -> dict:
+        try:
+            return jwt.decode(token, settings.JWT_SECRET_KEY, algorithms=[settings.JWT_ALGORITHM])
+        except jwt.exceptions.InvalidSignatureError:
+            raise HTTPException(status_code=401, detail="Invalid token")
