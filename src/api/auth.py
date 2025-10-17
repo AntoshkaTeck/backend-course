@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Body, HTTPException, Response
+from fastapi import APIRouter, Body, HTTPException, Response, Request
 from fastapi.openapi.models import Example
 
 from src.repositories.users import UsersRepository
@@ -56,3 +56,8 @@ async def login_user(
         response.set_cookie("access_token", access_token)
 
     return {"access_token": access_token}
+
+
+@router.get('/only_auth')
+async def only_auth(request: Request):
+    access_token = request.cookies.get("access_token")
