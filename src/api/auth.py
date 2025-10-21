@@ -1,5 +1,6 @@
 from fastapi import APIRouter, Body, HTTPException, Response
 from fastapi.openapi.models import Example
+from sqlalchemy.exc import IntegrityError
 
 from src.api.dependencies import UserIdDep
 from src.repositories.users import UsersRepository
@@ -25,9 +26,12 @@ async def register_user(user_data: UserRequestAdd = Body(
     hashed_password = AuthService().hash_password(user_data.password)
     new_user_data = UserAdd(email=user_data.email, hashed_password=hashed_password)
 
-    async with async_session_maker() as session:
-        await UsersRepository(session).add(new_user_data)
-        await session.commit()
+    try:
+        async with async_session_maker() as session:
+            await UsersRepository(session).add(new_user_data)
+            await session.commit()
+    except IntegrityError:
+        raise HTTPException(400, "Пользователь с таким email уже зарегистрирован")
 
     return {"satus": "OK"}
 

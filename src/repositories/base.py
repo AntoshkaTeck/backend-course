@@ -1,7 +1,5 @@
 from pydantic import BaseModel
 from sqlalchemy import select, delete, update, insert
-from sqlalchemy.exc import IntegrityError
-from fastapi.exceptions import HTTPException
 
 
 class BaseRepository:
@@ -28,15 +26,10 @@ class BaseRepository:
         return self.schema.model_validate(model)
 
     async def add(self, data: BaseModel):
-        try:
-            add_stmt = insert(self.model).values(**data.model_dump()).returning(self.model)
-            result = await self.session.execute(add_stmt)
-            model = result.scalars().one()
-            if model is None:
-                return None
-            return self.schema.model_validate(model)
-        except IntegrityError:
-            raise HTTPException(400, "Пользователь с таким email уже зарегистрирован")
+        add_stmt = insert(self.model).values(**data.model_dump()).returning(self.model)
+        result = await self.session.execute(add_stmt)
+        model = result.scalars().one()
+        return self.schema.model_validate(model)
 
     async def update(self, data: BaseModel, exclude_unset: bool = False, **filter_by):
         update_stmt = (
