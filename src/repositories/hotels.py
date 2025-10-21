@@ -1,7 +1,11 @@
+from datetime import date
+
 from sqlalchemy import select
 
+from src.models.rooms import RoomsOrm
 from src.repositories.base import BaseRepository
 from src.models.hotels import HotelsOrm
+from src.repositories.utils import rooms_ids_for_booking
 from src.schemas.hotels import Hotel
 
 
@@ -9,24 +13,30 @@ class HotelsRepository(BaseRepository):
     model = HotelsOrm
     schema = Hotel
 
-    async def get_all(
+    async def get_filtered_by_date(
             self,
-            location,
-            title,
-            limit,
-            offset
-    ):
-        query = select(HotelsOrm)
-        if location:
-            query = query.where(HotelsOrm.location.ilike(f"%{location}%"))
-        if title:
-            query = query.where(HotelsOrm.title.ilike(f"%{title}%"))
+            date_from: date,
+            date_to: date,
+            location: str,
+            title: str,
+            limit: int,
+            offset: int,
 
-        query = (
-            query
+
+    ):
+        rooms_ids_to_get = rooms_ids_for_booking(date_from=date_from, date_to=date_to)
+
+        hotels_ids_to_get = (
+            select(RoomsOrm.hotel_id)
+            .select_from(RoomsOrm)
+            .where(RoomsOrm.id.in_(rooms_ids_to_get))
             .limit(limit)
             .offset(offset)
         )
-        result = await self.session.execute(query)
 
-        return [self.schema.model_validate(model, from_attributes=True) for model in result.scalars().all()]
+        if location:
+            hotels_ids_to_get = hotels_ids_to_get.where(HotelsOrm.location.ilike(f"%{location}%"))
+        if title:
+            hotels_ids_to_get = hotels_ids_to_get.where(HotelsOrm.title.ilike(f"%{title}%"))
+
+        return await self.get_filtered(HotelsOrm.id.in_(hotels_ids_to_get))
