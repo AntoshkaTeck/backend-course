@@ -66,6 +66,20 @@ async def create_room(
 async def update_room(db: DBDep, hotel_id:int, room_id: int, room_data: RoomAddRequest):
     _room_data = RoomAdd(hotel_id=hotel_id, **room_data.model_dump())
     await db.rooms.update(_room_data, id=room_id, hotel_id=hotel_id)
+
+    existed_rooms_facilities = await db.rooms_facilities.get_filtered(room_id=room_id)
+
+    update_ids_set = set(room_data.facilities_ids)
+    exist_ids_set = {item.facility_id for item in existed_rooms_facilities}
+    need_add_set = update_ids_set - exist_ids_set
+    need_delete_set = exist_ids_set - update_ids_set
+
+    rooms_facilities_data = [RoomFacilityAdd(room_id=room_id, facility_id=f_id) for f_id in need_add_set]
+    rooms_facilities_delete_ids = [rf.id for rf in existed_rooms_facilities if rf.facility_id in need_delete_set]
+
+    await db.rooms_facilities.add_bulk(rooms_facilities_data)
+    # await db.rooms_facilities.delete_bulk_by_id(rooms_facilities_delete_ids)
+
     await db.commit()
 
     return {"satus": "OK"}
