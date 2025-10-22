@@ -66,20 +66,7 @@ async def create_room(
 async def update_room(db: DBDep, hotel_id:int, room_id: int, room_data: RoomAddRequest):
     _room_data = RoomAdd(hotel_id=hotel_id, **room_data.model_dump())
     await db.rooms.update(_room_data, id=room_id, hotel_id=hotel_id)
-
-    existed_rooms_facilities = await db.rooms_facilities.get_filtered(room_id=room_id)
-
-    update_ids_set = set(room_data.facilities_ids)
-    exist_ids_set = {item.facility_id for item in existed_rooms_facilities}
-    need_add_set = update_ids_set - exist_ids_set
-    need_delete_set = exist_ids_set - update_ids_set
-
-    rooms_facilities_data = [RoomFacilityAdd(room_id=room_id, facility_id=f_id) for f_id in need_add_set]
-    rooms_facilities_delete_ids = [rf.id for rf in existed_rooms_facilities if rf.facility_id in need_delete_set]
-
-    await db.rooms_facilities.add_bulk(rooms_facilities_data)
-    await db.rooms_facilities.delete_bulk_by_id(rooms_facilities_delete_ids)
-
+    await db.rooms_facilities.set_rooms_facilities(room_id=room_id,facilities_ids=room_data.facilities_ids)
     await db.commit()
 
     return {"satus": "OK"}
@@ -92,8 +79,11 @@ async def update_room_part(
         room_id: int,
         room_data: RoomPatchRequest
 ):
-    _room_data = RoomPatch(hotel_id=hotel_id, **room_data.model_dump(exclude_unset=True))
+    _room_data_dict = room_data.model_dump(exclude_unset=True)
+    _room_data = RoomPatch(hotel_id=hotel_id, **_room_data_dict)
     await db.rooms.update(room_data, exclude_unset=True, id=room_id, hotel_id=hotel_id)
+    if "facilities_ids" in _room_data_dict:
+        await db.rooms_facilities.set_rooms_facilities(room_id=room_id,facilities_ids=_room_data_dict["facilities_ids"])
     await db.commit()
 
     return {"satus": "OK"}
