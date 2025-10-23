@@ -20,7 +20,7 @@ async def get_rooms(
     return await db.rooms.get_filtered_by_date(hotel_id=hotel_id, date_from=date_from, date_to=date_to)
 
 @router.get("/{hotel_id}/rooms/{room_id}", summary="Получить один номер")
-async def get_room(db: DBDep, hotel_id, room_id: int):
+async def get_room(db: DBDep, hotel_id: int, room_id: int):
     return await db.rooms.get_one_or_none(id=room_id, hotel_id=hotel_id)
 
 
