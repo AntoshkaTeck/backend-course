@@ -31,7 +31,6 @@ class RoomsFacilitiesRepository(BaseRepository):
                     self.model.facility_id.in_(ids_to_delete)
                 )
             )
-            print(ids_to_delete, room_id)
             await self.session.execute(delete_m2m_facilities_stmt)
         if ids_to_insert:
             insert_m2m_facilities_stmt = (
