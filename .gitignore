@@ -10,3 +10,4 @@ __pycache__/
 docker-compose.yaml
 data
 src/static
+*.db

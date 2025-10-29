@@ -1,8 +1,10 @@
+import asyncio
 import os.path
 
 from PIL import Image, ImageOps
 from time import sleep
 
+from src.api.dependencies import get_db_manager
 from src.tasks.celery_app import celery_instance
 
 
@@ -32,3 +34,15 @@ def resize_image(image_path: str):
         img_resized.save(output_path)
 
     print(f"Resized image to {output_folder}")
+
+
+async def get_bookings_with_today_checkin_helper():
+    print("Start getting bookings with today's checkin")
+    async with get_db_manager(null_pool=True) as db:
+        bookings = await db.bookings.get_bookings_with_today_checkin()
+        print(f"{bookings=}")
+
+
+@celery_instance.task(name="booking_today_checkin")
+def send_emails_to_user_with_today_checkin():
+    asyncio.run(get_bookings_with_today_checkin_helper())
