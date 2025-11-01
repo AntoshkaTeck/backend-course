@@ -4,7 +4,7 @@ import pytest
 
 from httpx import ASGITransport, AsyncClient
 
-from src.api.dependencies import get_db_manager
+from src.api.dependencies import get_db_manager, get_db
 from src.config import settings
 from src.database import Base, engine_null_pull
 from src.main import app
@@ -17,11 +17,17 @@ from src.schemas.rooms import RoomAdd
 def check_test_mode():
     assert settings.MODE == "TEST"
 
+async def get_db_null_pull():
+    async with get_db_manager(null_pool=True) as db:
+        yield db
+
 
 @pytest.fixture()
 async def db():
-    async with get_db_manager(null_pool=True) as db:
+    async for db in get_db_null_pull():
         yield db
+
+app.dependency_overrides[get_db] = get_db_null_pull
 
 
 @pytest.fixture(scope="session", autouse=True)
