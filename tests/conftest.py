@@ -1,4 +1,7 @@
 import json
+from unittest import mock
+
+mock.patch("fastapi_cache.decorator.cache", lambda *args, **kwargs: lambda f: f).start()
 
 import pytest
 
@@ -17,6 +20,7 @@ from src.schemas.rooms import RoomAdd
 def check_test_mode():
     assert settings.MODE == "TEST"
 
+
 async def get_db_null_pull():
     async with get_db_manager(null_pool=True) as db:
         yield db
@@ -27,7 +31,8 @@ async def db():
     async for db in get_db_null_pull():
         yield db
 
-app.dependency_overrides[get_db] = get_db_null_pull
+
+app.dependency_overrides[get_db] = get_db_null_pull # type: ignore[attr-defined]
 
 
 @pytest.fixture(scope="session", autouse=True)

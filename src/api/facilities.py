@@ -9,7 +9,7 @@ router = APIRouter(prefix="/facilities", tags=["Удобства"])
 
 
 @router.get("/", summary="Получить все удобства")
-# @cache(expire=10)
+@cache(expire=10)
 async def get_facilities(db: DBDep):
     return await db.facilities.get_all()
 
