@@ -32,7 +32,7 @@ async def db():
         yield db
 
 
-app.dependency_overrides[get_db] = get_db_null_pull # type: ignore[attr-defined]
+app.dependency_overrides[get_db] = get_db_null_pull  # type: ignore[attr-defined]
 
 
 @pytest.fixture(scope="session", autouse=True)
@@ -72,3 +72,15 @@ async def register_user(setup_database, ac):
     }
 
     await ac.post("/auth/register", json=user_data)
+
+
+@pytest.fixture(scope="session", autouse=True)
+async def auth_ac(register_user, ac):
+    user_data = {
+        "email": "anton.tihov.94@gmail.com",
+        "password": "qwerty12345678"
+    }
+
+    response = await ac.post("/auth/login", json=user_data)
+    assert response.status_code == 200
+    yield response
