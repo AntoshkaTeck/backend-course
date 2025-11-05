@@ -1,4 +1,4 @@
-#ruff: noqa: E402
+# ruff: noqa: E402
 import json
 from unittest import mock
 
@@ -12,7 +12,7 @@ from src.api.dependencies import get_db_manager, get_db
 from src.config import settings
 from src.database import Base, engine_null_pull
 from src.main import app
-from src.models import * # noqa
+from src.models import *  # noqa
 from src.schemas.hotels import HotelAdd
 from src.schemas.rooms import RoomAdd
 
@@ -47,7 +47,7 @@ async def setup_database(check_test_mode) -> None:
 async def add_data_to_database(setup_database):
     with (
         open("tests/mock_hotels.json", "r") as hotels_file,
-        open("tests/mock_rooms.json", "r") as rooms_file
+        open("tests/mock_rooms.json", "r") as rooms_file,
     ):
         hotels_data = json.load(hotels_file)
         rooms_data = json.load(rooms_file)
@@ -59,28 +59,20 @@ async def add_data_to_database(setup_database):
 
 @pytest.fixture(scope="session")
 async def ac():
-    async with AsyncClient(
-            transport=ASGITransport(app=app), base_url="http://test"
-    ) as ac:
+    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as ac:
         yield ac
 
 
 @pytest.fixture(scope="session", autouse=True)
 async def register_user(setup_database, ac):
-    user_data = {
-        "email": "anton.tihov.94@gmail.com",
-        "password": "qwerty12345678"
-    }
+    user_data = {"email": "anton.tihov.94@gmail.com", "password": "qwerty12345678"}
 
     await ac.post("/auth/register", json=user_data)
 
 
 @pytest.fixture(scope="session")
 async def auth_ac(register_user, ac):
-    user_data = {
-        "email": "anton.tihov.94@gmail.com",
-        "password": "qwerty12345678"
-    }
+    user_data = {"email": "anton.tihov.94@gmail.com", "password": "qwerty12345678"}
 
     await ac.post("/auth/login", json=user_data)
     assert ac.cookies["access_token"]

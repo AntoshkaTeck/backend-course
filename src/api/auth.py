@@ -5,21 +5,21 @@ from src.api.dependencies import UserIdDep, DBDep
 from src.schemas.users import UserRequestAdd, UserAdd
 from src.service.auth import AuthService
 
-router = APIRouter(prefix='/auth', tags=['Авторизация и Аутентификация'])
+router = APIRouter(prefix="/auth", tags=["Авторизация и Аутентификация"])
 
 
-@router.post('/register', summary="Добавление пользователя")
-async def register_user(db: DBDep, user_data: UserRequestAdd = Body(
-    openapi_examples={
-        "1": Example(
-            summary="Anton",
-            value={
-                "email": "anton.tihov.94@gmail.com",
-                "password": "qwerty12345678"
-            }
-        )
-    }
-)):
+@router.post("/register", summary="Добавление пользователя")
+async def register_user(
+    db: DBDep,
+    user_data: UserRequestAdd = Body(
+        openapi_examples={
+            "1": Example(
+                summary="Anton",
+                value={"email": "anton.tihov.94@gmail.com", "password": "qwerty12345678"},
+            )
+        }
+    ),
+):
     hashed_password = AuthService().hash_password(user_data.password)
     new_user_data = UserAdd(email=user_data.email, hashed_password=hashed_password)
 
@@ -29,21 +29,18 @@ async def register_user(db: DBDep, user_data: UserRequestAdd = Body(
     return {"status": "OK"}
 
 
-@router.post('/login', summary="Аутентификация")
+@router.post("/login", summary="Аутентификация")
 async def login_user(
-        db: DBDep,
-        user_data: UserRequestAdd = Body(
-            openapi_examples={
-                "1": Example(
-                    summary="Anton",
-                    value={
-                        "email": "anton.tihov.94@gmail.com",
-                        "password": "qwerty12345678"
-                    }
-                )
-            }
-        ),
-        response: Response = Response()
+    db: DBDep,
+    user_data: UserRequestAdd = Body(
+        openapi_examples={
+            "1": Example(
+                summary="Anton",
+                value={"email": "anton.tihov.94@gmail.com", "password": "qwerty12345678"},
+            )
+        }
+    ),
+    response: Response = Response(),
 ):
     user = await db.users.get_user_with_hashed_password(email=user_data.email)
     if not user:
@@ -56,13 +53,13 @@ async def login_user(
     return {"access_token": access_token}
 
 
-@router.post('/logout', summary="Выход из системы")
+@router.post("/logout", summary="Выход из системы")
 async def logout_user(response: Response):
     response.delete_cookie("access_token")
-    return {"status": 'OK'}
+    return {"status": "OK"}
 
 
-@router.get('/me')
+@router.get("/me")
 async def get_me(db: DBDep, user_id: UserIdDep):
     user = await db.users.get_one_or_none(id=user_id)
     return {"data": user}

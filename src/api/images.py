@@ -9,8 +9,8 @@ router = APIRouter(prefix="/images", tags=["Изображения"])
 
 @router.post("/")
 def upload_image(
-        file: UploadFile,
-        background_tasks: BackgroundTasks  # Не круто - медленно!
+    file: UploadFile,
+    background_tasks: BackgroundTasks,  # Не круто - медленно!
 ):
     image_path = f"src/static/images/{file.filename}"
     with open(image_path, "wb+") as f:

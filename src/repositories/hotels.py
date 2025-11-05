@@ -14,15 +14,13 @@ class HotelsRepository(BaseRepository):
     mapper = HotelDataMapper
 
     async def get_filtered_by_date(
-            self,
-            date_from: date,
-            date_to: date,
-            location: str,
-            title: str,
-            limit: int,
-            offset: int,
-
-
+        self,
+        date_from: date,
+        date_to: date,
+        location: str,
+        title: str,
+        limit: int,
+        offset: int,
     ):
         rooms_ids_to_get = rooms_ids_for_booking(date_from=date_from, date_to=date_to)
 

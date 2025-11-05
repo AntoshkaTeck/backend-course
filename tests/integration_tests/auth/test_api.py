@@ -1,12 +1,15 @@
 import pytest
 
 
-@pytest.mark.parametrize("user_data, status_code", [
-    ({"email": "", "password": ""}, 422),
-    ({"email": "test@test", "password": "1234"}, 422),
-    ({"email": "test@test.ru", "password": "1234"}, 200),
-    ({"email": "test@test.ru", "password": "1234"}, 403),
-])
+@pytest.mark.parametrize(
+    "user_data, status_code",
+    [
+        ({"email": "", "password": ""}, 422),
+        ({"email": "test@test", "password": "1234"}, 422),
+        ({"email": "test@test.ru", "password": "1234"}, 200),
+        ({"email": "test@test.ru", "password": "1234"}, 403),
+    ],
+)
 async def test_register(user_data, status_code, ac):
     response = await ac.post("/auth/register", json=user_data)
     assert response.status_code == status_code
@@ -15,11 +18,14 @@ async def test_register(user_data, status_code, ac):
         assert res["status"] == "OK"
 
 
-@pytest.mark.parametrize("user_data, status_code", [
-    ({"email": "", "password": ""}, 422),
-    ({"email": "test@test.ru", "password": "1234"}, 200),
-    ({"email": "test@test.ru", "password": "1111"}, 401),
-])
+@pytest.mark.parametrize(
+    "user_data, status_code",
+    [
+        ({"email": "", "password": ""}, 422),
+        ({"email": "test@test.ru", "password": "1234"}, 200),
+        ({"email": "test@test.ru", "password": "1111"}, 401),
+    ],
+)
 async def test_login_user(user_data, status_code, ac):
     response = await ac.post("/auth/login", json=user_data)
     assert response.status_code == status_code
@@ -27,9 +33,12 @@ async def test_login_user(user_data, status_code, ac):
         assert "access_token" in ac.cookies
 
 
-@pytest.mark.parametrize("user_data", [
-    ({"email": "test@test.ru"}),
-])
+@pytest.mark.parametrize(
+    "user_data",
+    [
+        ({"email": "test@test.ru"}),
+    ],
+)
 async def test_logged_me(user_data, ac):
     response = await ac.get("/auth/me")
     res = response.json()

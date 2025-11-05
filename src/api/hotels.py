@@ -13,12 +13,12 @@ router = APIRouter(prefix="/hotels", tags=["Отели"])
 @router.get("/")
 @cache(expire=10)
 async def get_hotels(
-        pagination: PaginationDep,
-        db: DBDep,
-        date_from: date = Query(openapi_examples={"default": Example(value="2025-10-21")}),
-        date_to: date = Query(openapi_examples={"default": Example(value="2025-10-24")}),
-        title: str | None = Query(default=None, description="Название отеля"),
-        location: str | None = Query(default=None, description="Расположение отеля"),
+    pagination: PaginationDep,
+    db: DBDep,
+    date_from: date = Query(openapi_examples={"default": Example(value="2025-10-21")}),
+    date_to: date = Query(openapi_examples={"default": Example(value="2025-10-24")}),
+    title: str | None = Query(default=None, description="Название отеля"),
+    location: str | None = Query(default=None, description="Расположение отеля"),
 ):
     per_page = pagination.per_page or 5
 
@@ -28,8 +28,9 @@ async def get_hotels(
         location=location,
         title=title,
         limit=per_page,
-        offset=per_page * (pagination.page - 1)
+        offset=per_page * (pagination.page - 1),
     )
+
 
 @router.get("/{hotel_id}", summary="Получить один отель")
 async def get_hotel(hotel_id: int, db: DBDep):
@@ -38,25 +39,17 @@ async def get_hotel(hotel_id: int, db: DBDep):
 
 @router.post("/")
 async def create_hotel(
-        db: DBDep,
-        hotel_data: HotelAdd = Body(
-            openapi_examples={
-                "1": Example(
-                    summary="Сочи",
-                    value={
-                        "title": "Отель Сочи 5 звезд",
-                        "location": "ул. Моря 1"
-                    }
-                ),
-                "2": Example(
-                    summary="Дубай",
-                    value={
-                        "title": "Отель Дубай у фонтана",
-                        "location": "ул. Шейха 2"
-                    }
-                )
-            }
-        ),
+    db: DBDep,
+    hotel_data: HotelAdd = Body(
+        openapi_examples={
+            "1": Example(
+                summary="Сочи", value={"title": "Отель Сочи 5 звезд", "location": "ул. Моря 1"}
+            ),
+            "2": Example(
+                summary="Дубай", value={"title": "Отель Дубай у фонтана", "location": "ул. Шейха 2"}
+            ),
+        }
+    ),
 ):
     hotel = await db.hotels.add(hotel_data)
     await db.commit()
@@ -74,11 +67,11 @@ async def update_hotel(hotel_id: int, hotel_data: HotelAdd, db: DBDep):
 
 @router.patch("/{hotel_id}")
 async def update_hotel_part(
-        hotel_id: int,
-        hotel_data: HotelPATCH,
-        db: DBDep,
+    hotel_id: int,
+    hotel_data: HotelPATCH,
+    db: DBDep,
 ):
-    await db.hotels.update(hotel_data, exclude_unset=True , id=hotel_id)
+    await db.hotels.update(hotel_data, exclude_unset=True, id=hotel_id)
     await db.commit()
 
     return {"satus": "OK"}

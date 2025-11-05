@@ -9,9 +9,9 @@ celery_instance = Celery(
 )
 
 celery_instance.conf.beat_schedule = {
-    #Ключ - любое название
+    # Ключ - любое название
     "0": {
-        "task": "booking_today_checkin", # Название таски, в которое в декораторе
-        "schedule": 5, # секунды (если сложно: crontab(minute=...))
+        "task": "booking_today_checkin",  # Название таски, в которое в декораторе
+        "schedule": 5,  # секунды (если сложно: crontab(minute=...))
     }
 }
