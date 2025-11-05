@@ -26,7 +26,7 @@ async def get_db_null_pull():
         yield db
 
 
-@pytest.fixture(scope="module")
+@pytest.fixture()
 async def db():
     async for db in get_db_null_pull():
         yield db

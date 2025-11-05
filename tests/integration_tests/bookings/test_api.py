@@ -1,5 +1,7 @@
 import pytest
 
+from tests.conftest import get_db_null_pull
+
 
 @pytest.mark.parametrize("room_id, date_from, date_to, status_code", [
     (1, "2025-11-01", "2025-11-30", 200),
@@ -32,17 +34,16 @@ async def test_add_booking(room_id,
 
 
 @pytest.fixture(scope="module")
-async def del_all_bookings(db):
-    bookings = await db.bookings.get_all()
-    for booking in bookings:
-        await db.bookings.delete(id=booking.id)
-    await db.commit()
+async def del_all_bookings():
+    async for db_ in get_db_null_pull():
+        await db_.bookings.delete()
+        await db_.commit()
 
 
 @pytest.mark.parametrize("room_id, date_from, date_to, booking_count", [
-    (2, "2025-11-01", "2025-11-05", 1),
-    (2, "2025-11-10", "2025-11-20", 2),
-    (2, "2025-12-01", "2025-12-10", 3),
+    (1, "2025-11-01", "2025-11-05", 1),
+    (1, "2025-11-10", "2025-11-20", 2),
+    (1, "2025-12-01", "2025-12-10", 3),
 ])
 async def test_add_and_get_bookings(room_id, date_from, date_to, booking_count, auth_ac, del_all_bookings):
     await auth_ac.post(
