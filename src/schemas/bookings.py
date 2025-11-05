@@ -1,12 +1,12 @@
 from datetime import date
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field
 
 
 class BookingAddRequest(BaseModel):
     date_from: date
     date_to: date
-    room_id: int
+    room_id: int = Field(..., ge=1, le=2_147_483_647)
 
 
 class BookingAdd(BaseModel):

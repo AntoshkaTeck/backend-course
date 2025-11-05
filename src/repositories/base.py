@@ -1,7 +1,9 @@
 from fastapi import HTTPException
 from pydantic import BaseModel
 from sqlalchemy import select, delete, update, insert
-from sqlalchemy.exc import IntegrityError
+from sqlalchemy.exc import IntegrityError, NoResultFound
+
+from src.exceptions import ObjectNotFoundException
 from src.repositories.mappers.base import DataMapper
 
 
@@ -27,6 +29,15 @@ class BaseRepository:
         if model is None:
             return None
         return self.mapper.map_to_domain_entity(model)
+
+    async def get_one(self, **filter_by):
+        query = select(self.model).filter_by(**filter_by)
+        result = await self.session.execute(query)
+        try:
+            model = result.scalar_one()
+            return self.mapper.map_to_domain_entity(model)
+        except NoResultFound:
+            raise ObjectNotFoundException
 
     async def add(self, data: BaseModel):
         try:
