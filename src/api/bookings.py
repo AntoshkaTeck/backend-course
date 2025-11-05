@@ -32,11 +32,11 @@ async def create_booking(
     return {"status": "OK", "data": booking}
 
 
-@router.get("/bookings", summary="Получение всех бронирований")
+@router.get("/", summary="Получение всех бронирований")
 async def get_bookings(db: DBDep):
     return await db.bookings.get_all()
 
 
-@router.get("/bookings/me", summary="Получение бронирований текущего пользователя")
+@router.get("/me", summary="Получение бронирований текущего пользователя")
 async def get_bookings_current_user(db: DBDep, user_id: UserIdDep):
     return await db.bookings.get_filtered(user_id=user_id)
