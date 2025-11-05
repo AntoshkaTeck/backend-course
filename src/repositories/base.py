@@ -1,6 +1,7 @@
+from fastapi import HTTPException
 from pydantic import BaseModel
 from sqlalchemy import select, delete, update, insert
-
+from sqlalchemy.exc import IntegrityError
 from src.repositories.mappers.base import DataMapper
 
 
@@ -32,10 +33,13 @@ class BaseRepository:
         return self.mapper.map_to_domain_entity(model)
 
     async def add(self, data: BaseModel):
-        add_stmt = insert(self.model).values(**data.model_dump()).returning(self.model)
-        result = await self.session.execute(add_stmt)
-        model = result.scalars().one()
-        return self.mapper.map_to_domain_entity(model)
+        try:
+            add_stmt = insert(self.model).values(**data.model_dump()).returning(self.model)
+            result = await self.session.execute(add_stmt)
+            model = result.scalars().one()
+            return self.mapper.map_to_domain_entity(model)
+        except IntegrityError:
+            raise HTTPException(status_code=403, detail="Field not unique")
 
     async def add_bulk(self, data: list[BaseModel]):
         add_stmt = insert(self.model).values([item.model_dump() for item in data])

@@ -26,7 +26,7 @@ async def register_user(db: DBDep, user_data: UserRequestAdd = Body(
     await db.users.add(new_user_data)
     await db.commit()
 
-    return {"satus": "OK"}
+    return {"status": "OK"}
 
 
 @router.post('/login', summary="Аутентификация")
