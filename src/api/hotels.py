@@ -1,10 +1,11 @@
 from datetime import date
 
-from fastapi import Query, APIRouter, Body
+from fastapi import Query, APIRouter, Body, HTTPException
 from fastapi.openapi.models import Example
 from fastapi_cache.decorator import cache
 
 from src.api.dependencies import PaginationDep, DBDep
+from src.exceptions import IncorrectDatesException, ObjectNotFoundException
 from src.schemas.hotels import HotelPATCH, HotelAdd
 
 router = APIRouter(prefix="/hotels", tags=["Отели"])
@@ -21,20 +22,27 @@ async def get_hotels(
     location: str | None = Query(default=None, description="Расположение отеля"),
 ):
     per_page = pagination.per_page or 5
-
-    return await db.hotels.get_filtered_by_date(
-        date_from=date_from,
-        date_to=date_to,
-        location=location,
-        title=title,
-        limit=per_page,
-        offset=per_page * (pagination.page - 1),
-    )
+    try:
+        return await db.hotels.get_filtered_by_date(
+            date_from=date_from,
+            date_to=date_to,
+            location=location,
+            title=title,
+            limit=per_page,
+            offset=per_page * (pagination.page - 1),
+        )
+    except IncorrectDatesException as ex:
+        raise HTTPException(status_code=400, detail=ex.detail)
 
 
 @router.get("/{hotel_id}", summary="Получить один отель")
 async def get_hotel(hotel_id: int, db: DBDep):
-    return await db.hotels.get_one_or_none(id=hotel_id)
+    try:
+        return await db.hotels.get_one(id=hotel_id)
+    except ObjectNotFoundException:
+        raise HTTPException(status_code=404, detail="Отель не найден")
+
+
 
 
 @router.post("/")

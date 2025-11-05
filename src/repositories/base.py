@@ -1,9 +1,8 @@
-from fastapi import HTTPException
 from pydantic import BaseModel
 from sqlalchemy import select, delete, update, insert
 from sqlalchemy.exc import IntegrityError, NoResultFound
 
-from src.exceptions import ObjectNotFoundException
+from src.exceptions import ObjectNotFoundException, UserAlreadyExistException
 from src.repositories.mappers.base import DataMapper
 
 
@@ -46,7 +45,7 @@ class BaseRepository:
             model = result.scalars().one()
             return self.mapper.map_to_domain_entity(model)
         except IntegrityError:
-            raise HTTPException(status_code=403, detail="Field not unique")
+            raise UserAlreadyExistException
 
     async def add_bulk(self, data: list[BaseModel]):
         add_stmt = insert(self.model).values([item.model_dump() for item in data])
