@@ -29,3 +29,32 @@ async def test_add_booking(room_id,
         assert res["status"] == "OK"
         assert isinstance(res, dict)
         assert "data" in res
+
+
+@pytest.fixture(scope="module")
+async def del_all_bookings(db):
+    bookings = await db.bookings.get_all()
+    for booking in bookings:
+        await db.bookings.delete(id=booking.id)
+    await db.commit()
+
+
+@pytest.mark.parametrize("room_id, date_from, date_to, booking_count", [
+    (2, "2025-11-01", "2025-11-05", 1),
+    (2, "2025-11-10", "2025-11-20", 2),
+    (2, "2025-12-01", "2025-12-10", 3),
+])
+async def test_add_and_get_bookings(room_id, date_from, date_to, booking_count, auth_ac, del_all_bookings):
+    await auth_ac.post(
+        "/bookings/",
+        json={
+            "room_id": room_id,
+            "date_from": date_from,
+            "date_to": date_to,
+
+        }
+    )
+    response = await auth_ac.get("/bookings/me")
+    res = response.json()
+    assert isinstance(res, list)
+    assert len(res) == booking_count
