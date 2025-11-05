@@ -5,7 +5,7 @@ from fastapi.openapi.models import Example
 from fastapi_cache.decorator import cache
 
 from src.api.dependencies import PaginationDep, DBDep
-from src.exceptions import IncorrectDatesException, ObjectNotFoundException
+from src.exceptions import IncorrectDatesException, ObjectNotFoundException, HotelNotFoundException
 from src.schemas.hotels import HotelPATCH, HotelAdd
 
 router = APIRouter(prefix="/hotels", tags=["Отели"])
@@ -40,7 +40,7 @@ async def get_hotel(hotel_id: int, db: DBDep):
     try:
         return await db.hotels.get_one(id=hotel_id)
     except ObjectNotFoundException:
-        raise HTTPException(status_code=404, detail="Отель не найден")
+        raise HotelNotFoundException
 
 
 
