@@ -1,8 +1,8 @@
 from datetime import date
 
-from fastapi import HTTPException
 from sqlalchemy import select
 
+from src.exceptions import AllRoomsAreBookedException
 from src.models.bookings import BookingsOrm
 from src.repositories.base import BaseRepository
 from src.repositories.mappers.mappers import BookingDataMapper
@@ -27,6 +27,6 @@ class BookingsRepository(BaseRepository):
         result = await self.session.execute(query)
         availability_ids = result.scalars().all()
         if booking_data.room_id not in availability_ids:
-            raise HTTPException(status_code=403, detail="Бронирование запрещено")
+            raise AllRoomsAreBookedException
 
         return await self.add(booking_data)
