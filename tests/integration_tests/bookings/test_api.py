@@ -11,7 +11,7 @@ from tests.conftest import get_db_null_pull
         (1, "2025-11-01", "2025-11-30", 200),
         (1, "2025-11-01", "2025-11-30", 200),
         (1, "2025-11-01", "2025-11-30", 200),
-        (1, "2025-11-01", "2025-11-30", 403),
+        (1, "2025-11-01", "2025-11-30", 409),
     ],
 )
 async def test_add_booking(room_id, date_from, date_to, status_code, auth_ac, db):

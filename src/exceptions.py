@@ -13,6 +13,12 @@ class ExceptionBase(Exception):
 class ObjectNotFoundException(ExceptionBase):
     detail = "Объект не найден"
 
+class HotelNotFoundException(ExceptionBase):
+    detail = "Отель не найден"
+
+class RoomNotFoundException(ExceptionBase):
+    detail = "Номер не найден"
+
 
 class AllRoomsAreBookedException(ExceptionBase):
     detail = "Не осталось свободных номеров"
@@ -39,11 +45,11 @@ class HTTPExceptionBase(HTTPException):
         super().__init__(self.status_code, self.detail)
 
 
-class HotelNotFoundException(HTTPExceptionBase):
+class HotelNotFoundHTTPException(HTTPExceptionBase):
     status_code = 404
     detail = "Отель не найден"
 
 
-class RoomNotFoundException(HTTPExceptionBase):
+class RoomNotFoundHTTPException(HTTPExceptionBase):
     status_code = 404
     detail = "Номер не найден"

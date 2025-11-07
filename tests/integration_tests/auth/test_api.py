@@ -7,7 +7,7 @@ import pytest
         ({"email": "", "password": ""}, 422),
         ({"email": "test@test", "password": "1234"}, 422),
         ({"email": "test@test.ru", "password": "1234"}, 200),
-        ({"email": "test@test.ru", "password": "1234"}, 403),
+        ({"email": "test@test.ru", "password": "1234"}, 409),
     ],
 )
 async def test_register(user_data, status_code, ac):

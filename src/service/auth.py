@@ -5,9 +5,10 @@ from pwdlib import PasswordHash
 import jwt
 
 from src.config import settings
+from src.service.base import BaseService
 
 
-class AuthService:
+class AuthService(BaseService):
     password_hash = PasswordHash.recommended()
 
     def verify_password(self, plain_password, hashed_password) -> bool:
