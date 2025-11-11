@@ -31,9 +31,7 @@ class RoomsRepository(BaseRepository):
         )
         result = await self.session.execute(query)
         rooms = result.scalars().all()
-        return [
-            RoomWithRelsDataMapper.map_to_domain_entity(model) for model in rooms
-        ]
+        return [RoomWithRelsDataMapper.map_to_domain_entity(model) for model in rooms]
 
     async def get_one_with_rels(self, **filter_by):
         query = (

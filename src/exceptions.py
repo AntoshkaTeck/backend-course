@@ -13,11 +13,21 @@ class ExceptionBase(Exception):
 class ObjectNotFoundException(ExceptionBase):
     detail = "Объект не найден"
 
+
 class HotelNotFoundException(ExceptionBase):
     detail = "Отель не найден"
 
+
 class RoomNotFoundException(ExceptionBase):
     detail = "Номер не найден"
+
+
+class UserNotFoundException(ExceptionBase):
+    detail = "Пользователь не найден"
+
+
+class IncorrectPasswordException(ExceptionBase):
+    detail = "Неправильный email или пароль"
 
 
 class AllRoomsAreBookedException(ExceptionBase):
@@ -28,8 +38,16 @@ class ObjectAlreadyExistsException(ExceptionBase):
     detail = "Объект уже существует"
 
 
+class UserAlreadyExistsException(ExceptionBase):
+    detail = "Пользователь уже существует"
+
+
 class IncorrectDatesException(ExceptionBase):
     detail = "Дата выезда не может быть раньше или равна дате заезда"
+
+
+class InvalidTokenException(ExceptionBase):
+    detail = "Ошибка в токене"
 
 
 def validate_booking_dates(date_from: date, date_to: date):
@@ -53,3 +71,18 @@ class HotelNotFoundHTTPException(HTTPExceptionBase):
 class RoomNotFoundHTTPException(HTTPExceptionBase):
     status_code = 404
     detail = "Номер не найден"
+
+
+class AllRoomsAreBookedHTTPException(HTTPExceptionBase):
+    detail = "Не осталось свободных номеров"
+    status_code = 409
+
+
+class UserAlreadyExistsHTTPException(HTTPExceptionBase):
+    detail = "Пользователь с таким email существует"
+    status_code = 409
+
+
+class IncorrectPasswordHTTPException(HTTPExceptionBase):
+    detail = "Неправильный email или пароль"
+    status_code = 401

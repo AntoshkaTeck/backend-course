@@ -9,15 +9,13 @@ from src.service.hotels import HotelService
 
 class RoomService(BaseService):
     async def get_filtered_by_date(
-            self,
-            hotel_id: int,
-            date_from: date,
-            date_to: date,
+        self,
+        hotel_id: int,
+        date_from: date,
+        date_to: date,
     ):
         return await self.db.rooms.get_filtered_by_date(
-            hotel_id=hotel_id,
-            date_from=date_from,
-            date_to=date_to
+            hotel_id=hotel_id, date_from=date_from, date_to=date_to
         )
 
     async def get_room(self, room_id: int, hotel_id: int) -> Room:
@@ -44,11 +42,15 @@ class RoomService(BaseService):
         await self.db.commit()
         return room
 
-    async def update_room_partially(self, hotel_id: int, room_id: int, room_data: RoomPatchRequest) -> Room:
+    async def update_room_partially(
+        self, hotel_id: int, room_id: int, room_data: RoomPatchRequest
+    ) -> Room:
         await self.get_room_and_check(hotel_id=hotel_id, room_id=room_id)
         _room_data_dict = room_data.model_dump(exclude_unset=True)
         _room_data = RoomPatch(hotel_id=hotel_id, **_room_data_dict)
-        room = await self.db.rooms.update(room_data, exclude_unset=True, id=room_id, hotel_id=hotel_id)
+        room = await self.db.rooms.update(
+            room_data, exclude_unset=True, id=room_id, hotel_id=hotel_id
+        )
         if "facilities_ids" in _room_data_dict:
             await self.db.rooms_facilities.set_rooms_facilities(
                 room_id=room_id, facilities_ids=_room_data_dict["facilities_ids"]
@@ -61,8 +63,11 @@ class RoomService(BaseService):
         await self.db.rooms.delete(id=room_id, hotel_id=hotel_id)
         await self.db.commit()
 
-    async def get_room_and_check(self, room_id: int, hotel_id: int) -> Room:
+    async def get_room_and_check(self, room_id: int, hotel_id: int | None = None) -> Room:
         try:
-            return await self.db.rooms.get_one(id=room_id, hotel_id=hotel_id)
+            params = {"id": room_id}
+            if hotel_id:
+                params["hotel_id"] = hotel_id
+            return await self.db.rooms.get_one(**params)
         except ObjectNotFoundException:
             raise RoomNotFoundException

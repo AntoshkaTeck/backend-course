@@ -7,12 +7,12 @@ from src.service.base import BaseService
 
 class HotelService(BaseService):
     async def get_filtered_by_date(
-            self,
-            pagination,
-            date_from: date,
-            date_to: date,
-            title: str | None,
-            location: str | None,
+        self,
+        pagination,
+        date_from: date,
+        date_to: date,
+        title: str | None,
+        location: str | None,
     ) -> list[Hotel]:
         per_page = pagination.per_page or 5
         return await self.db.hotels.get_filtered_by_date(

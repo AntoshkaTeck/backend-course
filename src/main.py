@@ -8,7 +8,7 @@ from fastapi_cache import FastAPICache
 from fastapi_cache.backends.redis import RedisBackend
 import uvicorn
 
-sys.path.append(str(Path(__file__).parent.parent)) # noqa: E402
+sys.path.append(str(Path(__file__).parent.parent))  # noqa: E402
 
 logging.basicConfig(level=logging.INFO)
 

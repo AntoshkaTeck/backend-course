@@ -26,9 +26,7 @@ async def test_add_booking(room_id, date_from, date_to, status_code, auth_ac, db
     assert response.status_code == status_code
     if status_code == 200:
         res = response.json()
-        assert res["status"] == "OK"
         assert isinstance(res, dict)
-        assert "data" in res
 
 
 @pytest.fixture(scope="module")

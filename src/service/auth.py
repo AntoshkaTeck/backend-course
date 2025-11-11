@@ -1,10 +1,19 @@
 from datetime import datetime, timezone, timedelta
 
-from fastapi import HTTPException
 from pwdlib import PasswordHash
 import jwt
+from pydantic import EmailStr
 
 from src.config import settings
+from src.exceptions import (
+    ObjectAlreadyExistsException,
+    UserAlreadyExistsException,
+    InvalidTokenException,
+    ObjectNotFoundException,
+    UserNotFoundException,
+    IncorrectPasswordException,
+)
+from src.schemas.users import UserRequestAdd, UserAdd, User, UserWithHashedPassword
 from src.service.base import BaseService
 
 
@@ -32,4 +41,34 @@ class AuthService(BaseService):
         try:
             return jwt.decode(token, settings.JWT_SECRET_KEY, algorithms=[settings.JWT_ALGORITHM])
         except jwt.exceptions.InvalidSignatureError:
-            raise HTTPException(status_code=401, detail="Invalid token")
+            raise InvalidTokenException
+
+    async def register_user(self, user_data: UserRequestAdd) -> None:
+        hashed_password = self.hash_password(user_data.password)
+        new_user_data = UserAdd(email=user_data.email, hashed_password=hashed_password)
+        try:
+            await self.db.users.add(new_user_data)
+            await self.db.commit()
+        except ObjectAlreadyExistsException as ex:
+            raise UserAlreadyExistsException from ex
+
+    async def login_user(self, user_data: UserRequestAdd) -> str:
+        user = await self.get_user_with_hash_pass_and_check(email=user_data.email)
+        if not self.verify_password(user_data.password, user.hashed_password):
+            raise IncorrectPasswordException
+        return self.create_access_token({"user_id": user.id})
+
+    async def get_user_with_hash_pass_and_check(self, email: EmailStr) -> UserWithHashedPassword:
+        try:
+            return await self.db.users.get_user_with_hashed_password(email=email)
+        except ObjectNotFoundException:
+            raise UserNotFoundException
+
+    async def get_me(self, user_id: int) -> User:
+        return await self.get_user_by_id(user_id=user_id)
+
+    async def get_user_by_id(self, user_id: int) -> User:
+        try:
+            return await self.db.users.get_one(id=user_id)
+        except ObjectNotFoundException:
+            raise UserNotFoundException

@@ -1,14 +1,15 @@
-from fastapi import APIRouter, Body, HTTPException
+from fastapi import APIRouter, Body
 from fastapi.openapi.models import Example
 
 from src.api.dependencies import UserIdDep, DBDep
-from src.exceptions import ObjectNotFoundException, AllRoomsAreBookedException
-from src.schemas.bookings import BookingAddRequest, BookingAdd
+from src.exceptions import AllRoomsAreBookedException, AllRoomsAreBookedHTTPException
+from src.schemas.bookings import BookingAddRequest, Booking
+from src.service.bookings import BookingService
 
 router = APIRouter(prefix="/bookings", tags=["Бронирования"])
 
 
-@router.post("/", summary="Добавление бронирования")
+@router.post("/", summary="Добавление бронирования", response_model=Booking)
 async def create_booking(
     user_id: UserIdDep,
     db: DBDep,
@@ -22,25 +23,18 @@ async def create_booking(
     ),
 ):
     try:
-        room = await db.rooms.get_one(id=booking_data.room_id)
-    except ObjectNotFoundException:
-        raise HTTPException(status_code=400, detail="Номер не найден")
-    hotel = await db.hotels.get_one(id=room.hotel_id)
-    _booking_data = BookingAdd(user_id=user_id, **booking_data.model_dump(), price=room.price)
-    try:
-        booking = await db.bookings.add_booking(_booking_data, hotel_id=hotel.id)
-    except AllRoomsAreBookedException as ex:
-        raise HTTPException(status_code=409, detail=ex.detail)
-    await db.commit()
-
-    return {"status": "OK", "data": booking}
+        return await BookingService(db).create_booking(user_id=user_id, booking_data=booking_data)
+    except AllRoomsAreBookedException:
+        raise AllRoomsAreBookedHTTPException
 
 
-@router.get("/", summary="Получение всех бронирований")
+@router.get("/", summary="Получение всех бронирований", response_model=list[Booking])
 async def get_bookings(db: DBDep):
-    return await db.bookings.get_all()
+    return await BookingService(db).get_bookings()
 
 
-@router.get("/me", summary="Получение бронирований текущего пользователя")
+@router.get(
+    "/me", summary="Получение бронирований текущего пользователя", response_model=list[Booking]
+)
 async def get_bookings_current_user(db: DBDep, user_id: UserIdDep):
-    return await db.bookings.get_filtered(user_id=user_id)
+    return await BookingService(db).get_bookings_current_user(user_id=user_id)
