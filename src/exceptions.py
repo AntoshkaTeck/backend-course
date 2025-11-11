@@ -86,3 +86,13 @@ class UserAlreadyExistsHTTPException(HTTPExceptionBase):
 class IncorrectPasswordHTTPException(HTTPExceptionBase):
     detail = "Неправильный email или пароль"
     status_code = 401
+
+
+class InvalidTokenHTTPException(HTTPExceptionBase):
+    detail = "Ошибка в токене"
+    status_code = 401
+
+
+class NoAccessTokenHTTPException(HTTPExceptionBase):
+    detail = "Вы не предоставили токен доступа"
+    status_code = 401
