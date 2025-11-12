@@ -6,8 +6,8 @@ from fastapi import HTTPException
 class ExceptionBase(Exception):
     detail = "Неожиданная ошибка"
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(self.detail, *args, **kwargs)
+    def __init__(self):
+        super().__init__(self.detail)
 
 
 class ObjectNotFoundException(ExceptionBase):
