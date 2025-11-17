@@ -5,8 +5,6 @@ services:
     networks:
       - project_default
     restart: "always"
-    volumes:
-      - .:/app
     command: >
       sh -c "alembic upgrade head && uvicorn src.main:app --proxy-headers --host 0.0.0.0 --port 8000"
   booking-celery-worker-service:
