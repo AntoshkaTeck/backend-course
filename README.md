@@ -36,3 +36,12 @@ docker run -d \
     -v ./data:/data \
     redis:7.2 \
     redis-server --appendonly yes
+
+# CI/CD
+docker run --rm -it -v /srv/gitlab-runner/config:/etc/gitlab-runner gitlab/gitlab-runner:alpine register
+    -> docker
+    -> docker:dind
+```
+nano /srv/gitlab-runner/config/config.toml
+```
+volumes = ["/var/run/docker.sock:/var/run/docker.sock", "/cache"]
