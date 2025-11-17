@@ -2,6 +2,8 @@ services:
   booking-server-service:
     container_name: 'booking-server'
     image: booking-api-image:latest
+    networks:
+      - project_default
     restart: "always"
     volumes:
       - .:/app
@@ -15,6 +17,8 @@ services:
       - booking-server-service
   booking-celery-beat-service:
     container_name: 'booking-celery-beat'
+    networks:
+      - project_default
     image: booking-api-image:latest
     command: "celery --app=src.tasks.celery_app:celery_instance beat -l INFO"
     depends_on:
