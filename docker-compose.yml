@@ -5,6 +5,8 @@ services:
       context: .
     #    ports:
     #      - "8000:8000"
+    networks:
+      - project_default
     env_file:
       - .env
     restart: "always"
@@ -14,6 +16,8 @@ services:
       sh -c "alembic upgrade head && uvicorn src.main:app --proxy-headers --host 0.0.0.0 --port 8000"
   booking-celery-worker-service:
     container_name: 'booking-celery-worker'
+    networks:
+      - project_default
     build:
       context: .
     command: "celery --app=src.tasks.celery_app:celery_instance worker -l INFO"
@@ -23,6 +27,8 @@ services:
       - booking-server-service
   booking-celery-beat-service:
     container_name: 'booking-celery-beat'
+    networks:
+      - project_default
     build:
       context: .
     command: "celery --app=src.tasks.celery_app:celery_instance beat -l INFO"
@@ -30,3 +36,7 @@ services:
       - .env
     depends_on:
       - booking-server-service
+
+networks:
+  project_default:
+    external: true

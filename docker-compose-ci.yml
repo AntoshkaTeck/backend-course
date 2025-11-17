@@ -12,6 +12,8 @@ services:
   booking-celery-worker-service:
     container_name: 'booking-celery-worker'
     image: booking-api-image:latest
+    networks:
+      - project_default
     command: "celery --app=src.tasks.celery_app:celery_instance worker -l INFO"
     depends_on:
       - booking-server-service
@@ -23,3 +25,6 @@ services:
     command: "celery --app=src.tasks.celery_app:celery_instance beat -l INFO"
     depends_on:
       - booking-server-service
+networks:
+  project_default:
+    external: true
