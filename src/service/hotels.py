@@ -1,6 +1,7 @@
 from datetime import date
 
-from src.exceptions import ObjectNotFoundException, HotelNotFoundException
+from src.exceptions import ObjectNotFoundException, HotelNotFoundException, ObjectEmptyFieldsException, \
+    HotelEmptyFieldsException
 from src.schemas.hotels import HotelAdd, HotelPatch, Hotel
 from src.service.base import BaseService
 
@@ -38,7 +39,10 @@ class HotelService(BaseService):
         return hotel
 
     async def update_hotel_partially(self, hotel_data: HotelPatch, hotel_id: int) -> Hotel:
-        hotel = await self.db.hotels.update(hotel_data, exclude_unset=True, id=hotel_id)
+        try:
+            hotel = await self.db.hotels.update(hotel_data, exclude_unset=True, id=hotel_id)
+        except ObjectEmptyFieldsException as ex:
+            raise HotelEmptyFieldsException from ex
         await self.db.commit()
         return hotel
 

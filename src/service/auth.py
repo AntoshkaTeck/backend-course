@@ -11,7 +11,7 @@ from src.exceptions import (
     InvalidTokenException,
     ObjectNotFoundException,
     UserNotFoundException,
-    IncorrectPasswordException,
+    IncorrectPasswordException, ExpiredTokenException,
 )
 from src.schemas.users import UserRequestAdd, UserAdd, User, UserWithHashedPassword
 from src.service.base import BaseService
@@ -42,6 +42,8 @@ class AuthService(BaseService):
             return jwt.decode(token, settings.JWT_SECRET_KEY, algorithms=[settings.JWT_ALGORITHM])
         except jwt.exceptions.InvalidSignatureError:
             raise InvalidTokenException
+        except jwt.exceptions.ExpiredSignatureError:
+            raise ExpiredTokenException
 
     async def register_user(self, user_data: UserRequestAdd) -> None:
         hashed_password = self.hash_password(user_data.password)

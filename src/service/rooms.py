@@ -1,7 +1,8 @@
 import logging
 from datetime import date
 
-from src.exceptions import ObjectNotFoundException, RoomNotFoundException
+from src.exceptions import ObjectNotFoundException, RoomNotFoundException, ObjectEmptyFieldsException, \
+    RoomEmptyFieldsException, ObjectLinkNotFoundException, RoomFacilityNotFoundException
 from src.schemas.facilities import RoomFacilityAdd
 from src.schemas.rooms import RoomAdd, RoomAddRequest, RoomPatchRequest, RoomPatch, Room
 from src.service.base import BaseService
@@ -31,7 +32,11 @@ class RoomService(BaseService):
             RoomFacilityAdd(room_id=room.id, facility_id=f_id) for f_id in room_data.facilities_ids
         ]
         if rooms_facilities_data:
-            await self.db.rooms_facilities.add_bulk(rooms_facilities_data)
+            try:
+                await self.db.rooms_facilities.add_bulk(rooms_facilities_data)
+            except ObjectLinkNotFoundException as ex:
+                raise RoomFacilityNotFoundException from ex
+
         await self.db.commit()
         return room
 
@@ -39,9 +44,12 @@ class RoomService(BaseService):
         await self.get_room_and_check(hotel_id=hotel_id, room_id=room_id)
         _room_data = RoomAdd(hotel_id=hotel_id, **room_data.model_dump())
         room = await self.db.rooms.update(_room_data, id=room_id, hotel_id=hotel_id)
-        await self.db.rooms_facilities.set_rooms_facilities(
-            room_id=room_id, facilities_ids=room_data.facilities_ids
-        )
+        try:
+            await self.db.rooms_facilities.set_rooms_facilities(
+                room_id=room_id, facilities_ids=room_data.facilities_ids
+            )
+        except ObjectLinkNotFoundException as ex:
+            raise RoomFacilityNotFoundException from ex
         await self.db.commit()
         return room
 
@@ -51,13 +59,20 @@ class RoomService(BaseService):
         await self.get_room_and_check(hotel_id=hotel_id, room_id=room_id)
         _room_data_dict = room_data.model_dump(exclude_unset=True)
         _room_data = RoomPatch(hotel_id=hotel_id, **_room_data_dict)
-        room = await self.db.rooms.update(
-            room_data, exclude_unset=True, id=room_id, hotel_id=hotel_id
-        )
-        if "facilities_ids" in _room_data_dict:
-            await self.db.rooms_facilities.set_rooms_facilities(
-                room_id=room_id, facilities_ids=_room_data_dict["facilities_ids"]
+        try:
+            room = await self.db.rooms.update(
+                _room_data, exclude_unset=True, id=room_id, hotel_id=hotel_id
             )
+        except ObjectEmptyFieldsException as ex:
+            raise RoomEmptyFieldsException from ex
+
+        if "facilities_ids" in _room_data_dict:
+            try:
+                await self.db.rooms_facilities.set_rooms_facilities(
+                    room_id=room_id, facilities_ids=_room_data_dict["facilities_ids"]
+                )
+            except ObjectLinkNotFoundException as ex:
+                raise RoomFacilityNotFoundException from ex
         await self.db.commit()
         return room
 

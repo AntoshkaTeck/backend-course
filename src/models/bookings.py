@@ -12,7 +12,7 @@ class BookingsOrm(Base):
 
     id: Mapped[int] = mapped_column(primary_key=True)
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
-    room_id: Mapped[int] = mapped_column(ForeignKey("rooms.id"))
+    room_id: Mapped[int] = mapped_column(ForeignKey("rooms.id", ondelete="CASCADE"))
     date_from: Mapped[date] = mapped_column()
     date_to: Mapped[date] = mapped_column()
     price: Mapped[int] = mapped_column()

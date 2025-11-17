@@ -9,7 +9,9 @@ from src.exceptions import (
     RoomNotFoundHTTPException,
     HotelNotFoundHTTPException,
     HotelNotFoundException,
-    RoomNotFoundException,
+    RoomNotFoundException, RoomEmptyFieldsException, RoomEmptyFieldsHTTPException,
+    RoomFacilityNotFoundException,
+    RoomFacilityNotFoundHTTPException,
 )
 from src.schemas.rooms import RoomAddRequest, RoomPatchRequest, Room, RoomWithRels
 from src.service.rooms import RoomService
@@ -78,6 +80,8 @@ async def create_room(
         return await RoomService(db).create_room(hotel_id=hotel_id, room_data=room_data)
     except HotelNotFoundException:
         raise HotelNotFoundHTTPException
+    except RoomFacilityNotFoundException:
+        raise RoomFacilityNotFoundHTTPException
 
 
 @router.put(
@@ -90,6 +94,8 @@ async def update_room(db: DBDep, hotel_id: int, room_id: int, room_data: RoomAdd
         )
     except RoomNotFoundException:
         raise RoomNotFoundHTTPException
+    except RoomFacilityNotFoundException:
+        raise RoomFacilityNotFoundHTTPException
 
 
 @router.patch(
@@ -104,6 +110,10 @@ async def update_room_partially(
         )
     except RoomNotFoundException:
         raise RoomNotFoundHTTPException
+    except RoomEmptyFieldsException:
+        raise RoomEmptyFieldsHTTPException
+    except RoomFacilityNotFoundException:
+        raise RoomFacilityNotFoundHTTPException
 
 
 @router.delete("/{hotel_id}/rooms/{room_id}", summary="Удалить номер")

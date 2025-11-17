@@ -1,11 +1,12 @@
 import logging
 
-from asyncpg import UniqueViolationError
+from asyncpg import UniqueViolationError, ForeignKeyViolationError
 from pydantic import BaseModel
 from sqlalchemy import select, delete, update, insert
 from sqlalchemy.exc import IntegrityError, NoResultFound
 
-from src.exceptions import ObjectNotFoundException, ObjectAlreadyExistsException
+from src.exceptions import ObjectNotFoundException, ObjectAlreadyExistsException, ObjectEmptyFieldsException, \
+    ObjectLinkNotFoundException
 from src.repositories.mappers.base import DataMapper
 
 
@@ -58,14 +59,22 @@ class BaseRepository:
                 raise ex
 
     async def add_bulk(self, data: list[BaseModel]):
-        add_stmt = insert(self.model).values([item.model_dump() for item in data])
-        await self.session.execute(add_stmt)
+        try:
+            add_stmt = insert(self.model).values([item.model_dump() for item in data])
+            await self.session.execute(add_stmt)
+        except IntegrityError as ex:
+            # ловим конкретно FK violation от asyncpg
+            if isinstance(ex.orig.__cause__, ForeignKeyViolationError):
+                raise ObjectLinkNotFoundException from ex
 
     async def update(self, data: BaseModel, exclude_unset: bool = False, **filter_by):
+        values = data.model_dump(exclude_unset=exclude_unset)
+        if not values:
+            raise ObjectEmptyFieldsException
         update_stmt = (
             update(self.model)
             .filter_by(**filter_by)
-            .values(data.model_dump(exclude_unset=exclude_unset))
+            .values(values)
             .returning(self.model)
         )
         result = await self.session.execute(update_stmt)

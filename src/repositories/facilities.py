@@ -1,5 +1,8 @@
+from asyncpg import ForeignKeyViolationError
 from sqlalchemy import select, delete, insert
+from sqlalchemy.exc import IntegrityError
 
+from src.exceptions import ObjectLinkNotFoundException
 from src.models.facilities import FacilitiesOrm, RoomsFacilitiesOrm
 from src.repositories.base import BaseRepository
 from src.repositories.mappers.mappers import FacilityDataMapper, RoomFacilityDataMapper
@@ -28,7 +31,12 @@ class RoomsFacilitiesRepository(BaseRepository):
             )
             await self.session.execute(delete_m2m_facilities_stmt)
         if ids_to_insert:
-            insert_m2m_facilities_stmt = insert(self.model).values(
-                [{"room_id": room_id, "facility_id": f_id} for f_id in ids_to_insert]
-            )
-            await self.session.execute(insert_m2m_facilities_stmt)
+            try:
+                insert_m2m_facilities_stmt = insert(self.model).values(
+                    [{"room_id": room_id, "facility_id": f_id} for f_id in ids_to_insert]
+                )
+                await self.session.execute(insert_m2m_facilities_stmt)
+            except IntegrityError as ex:
+                # ловим конкретно FK violation от asyncpg
+                if isinstance(ex.orig.__cause__, ForeignKeyViolationError):
+                    raise ObjectLinkNotFoundException from ex

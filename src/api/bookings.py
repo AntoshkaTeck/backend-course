@@ -2,7 +2,6 @@ from fastapi import APIRouter, Body
 from fastapi.openapi.models import Example
 
 from src.api.dependencies import UserIdDep, DBDep
-from src.exceptions import AllRoomsAreBookedException, AllRoomsAreBookedHTTPException
 from src.schemas.bookings import BookingAddRequest, Booking
 from src.service.bookings import BookingService
 
@@ -22,10 +21,7 @@ async def create_booking(
         }
     ),
 ):
-    try:
-        return await BookingService(db).create_booking(user_id=user_id, booking_data=booking_data)
-    except AllRoomsAreBookedException:
-        raise AllRoomsAreBookedHTTPException
+    return await BookingService(db).create_booking(user_id=user_id, booking_data=booking_data)
 
 
 @router.get("/", summary="Получение всех бронирований", response_model=list[Booking])
