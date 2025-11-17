@@ -7,7 +7,7 @@
 __pycache__/
 *.pyc
 .venv/
-docker-compose.yaml
+docker-compose-dev.yaml
 data
 src/static
 *.db
