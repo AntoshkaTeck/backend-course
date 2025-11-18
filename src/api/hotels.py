@@ -8,7 +8,9 @@ from src.api.dependencies import PaginationDep, DBDep
 from src.exceptions import (
     IncorrectDatesException,
     ObjectNotFoundException,
-    HotelNotFoundHTTPException, HotelEmptyFieldsHTTPException, HotelEmptyFieldsException,
+    HotelNotFoundHTTPException,
+    HotelEmptyFieldsHTTPException,
+    HotelEmptyFieldsException,
 )
 from src.schemas.hotels import HotelPatch, HotelAdd, Hotel
 from src.service.hotels import HotelService
@@ -75,7 +77,9 @@ async def update_hotel_partially(
     db: DBDep,
 ):
     try:
-        return await HotelService(db).update_hotel_partially(hotel_data=hotel_data, hotel_id=hotel_id)
+        return await HotelService(db).update_hotel_partially(
+            hotel_data=hotel_data, hotel_id=hotel_id
+        )
     except HotelEmptyFieldsException:
         raise HotelEmptyFieldsHTTPException
 

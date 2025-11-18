@@ -9,7 +9,9 @@ from src.exceptions import (
     RoomNotFoundHTTPException,
     HotelNotFoundHTTPException,
     HotelNotFoundException,
-    RoomNotFoundException, RoomEmptyFieldsException, RoomEmptyFieldsHTTPException,
+    RoomNotFoundException,
+    RoomEmptyFieldsException,
+    RoomEmptyFieldsHTTPException,
     RoomFacilityNotFoundException,
     RoomFacilityNotFoundHTTPException,
 )

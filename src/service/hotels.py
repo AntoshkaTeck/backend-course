@@ -1,7 +1,11 @@
 from datetime import date
 
-from src.exceptions import ObjectNotFoundException, HotelNotFoundException, ObjectEmptyFieldsException, \
-    HotelEmptyFieldsException
+from src.exceptions import (
+    ObjectNotFoundException,
+    HotelNotFoundException,
+    ObjectEmptyFieldsException,
+    HotelEmptyFieldsException,
+)
 from src.schemas.hotels import HotelAdd, HotelPatch, Hotel
 from src.service.base import BaseService
 

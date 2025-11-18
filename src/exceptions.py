@@ -21,6 +21,7 @@ class HotelNotFoundException(ExceptionBase):
 class RoomNotFoundException(ExceptionBase):
     detail = "Номер не найден"
 
+
 class FacilityNotFoundException(ExceptionBase):
     detail = "Удобство не найдено"
 
@@ -48,12 +49,14 @@ class UserAlreadyExistsException(ExceptionBase):
 class IncorrectDatesException(ExceptionBase):
     detail = "Дата выезда не может быть раньше или равна дате заезда"
 
+
 class InvalidBookingDatesException(ExceptionBase):
     detail = "Дата бронирования не может быть раньше текущей даты"
 
 
 class InvalidTokenException(ExceptionBase):
     detail = "Ошибка в токене"
+
 
 class ExpiredTokenException(ExceptionBase):
     detail = "Срок действия токена истек"
@@ -62,8 +65,10 @@ class ExpiredTokenException(ExceptionBase):
 class ObjectEmptyFieldsException(ExceptionBase):
     detail = "Не передано ни одного поля для изменения объекта"
 
+
 class ObjectLinkNotFoundException(ExceptionBase):
     detail = "Объект для связи с другим объектом не найдено"
+
 
 class RoomFacilityNotFoundException(ExceptionBase):
     detail = "Удобство для связи с номером не найдено"
@@ -71,6 +76,7 @@ class RoomFacilityNotFoundException(ExceptionBase):
 
 class HotelEmptyFieldsException(ExceptionBase):
     detail = "Не передано ни одного поля для изменения отеля"
+
 
 class RoomEmptyFieldsException(ExceptionBase):
     detail = "Не передано ни одного поля для изменения номера"
@@ -83,7 +89,6 @@ def validate_booking_dates(date_from: date, date_to: date):
 
     if date_to <= date_from:
         raise IncorrectDatesException
-
 
 
 class HTTPExceptionBase(HTTPException):
@@ -103,9 +108,11 @@ class RoomNotFoundHTTPException(HTTPExceptionBase):
     status_code = 404
     detail = "Номер не найден"
 
+
 class FacilityNotFoundHTTPException(HTTPExceptionBase):
     status_code = 404
     detail = "Удобство не найдено"
+
 
 class RoomFacilityNotFoundHTTPException(HTTPExceptionBase):
     status_code = 409
@@ -146,13 +153,16 @@ class NoAccessTokenHTTPException(HTTPExceptionBase):
     detail = "Вы не предоставили токен доступа"
     status_code = 401
 
+
 class InvalidBookingDatesHTTPException(HTTPExceptionBase):
     detail = "Дата бронирования не может быть раньше текущей даты"
     status_code = 422
 
+
 class IncorrectDatesHTTPException(HTTPExceptionBase):
     detail = "Дата выезда не может быть раньше или равна дате заезда"
     status_code = 422
+
 
 class ExpiredTokenHTTPException(HTTPExceptionBase):
     detail = "Срок действия токена истек"

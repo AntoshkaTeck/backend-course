@@ -1,8 +1,14 @@
 import logging
 from datetime import date
 
-from src.exceptions import ObjectNotFoundException, RoomNotFoundException, ObjectEmptyFieldsException, \
-    RoomEmptyFieldsException, ObjectLinkNotFoundException, RoomFacilityNotFoundException
+from src.exceptions import (
+    ObjectNotFoundException,
+    RoomNotFoundException,
+    ObjectEmptyFieldsException,
+    RoomEmptyFieldsException,
+    ObjectLinkNotFoundException,
+    RoomFacilityNotFoundException,
+)
 from src.schemas.facilities import RoomFacilityAdd
 from src.schemas.rooms import RoomAdd, RoomAddRequest, RoomPatchRequest, RoomPatch, Room
 from src.service.base import BaseService

@@ -11,7 +11,8 @@ from src.exceptions import (
     InvalidTokenException,
     ObjectNotFoundException,
     UserNotFoundException,
-    IncorrectPasswordException, ExpiredTokenException,
+    IncorrectPasswordException,
+    ExpiredTokenException,
 )
 from src.schemas.users import UserRequestAdd, UserAdd, User, UserWithHashedPassword
 from src.service.base import BaseService

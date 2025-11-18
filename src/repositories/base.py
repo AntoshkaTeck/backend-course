@@ -6,8 +6,12 @@ from sqlalchemy import select, delete, update, insert
 from sqlalchemy.exc import IntegrityError, NoResultFound
 
 from src.database import Base
-from src.exceptions import ObjectNotFoundException, ObjectAlreadyExistsException, ObjectEmptyFieldsException, \
-    ObjectLinkNotFoundException
+from src.exceptions import (
+    ObjectNotFoundException,
+    ObjectAlreadyExistsException,
+    ObjectEmptyFieldsException,
+    ObjectLinkNotFoundException,
+)
 from src.repositories.mappers.base import DataMapper
 
 
@@ -73,12 +77,7 @@ class BaseRepository:
         values = data.model_dump(exclude_unset=exclude_unset)
         if not values:
             raise ObjectEmptyFieldsException
-        update_stmt = (
-            update(self.model)
-            .filter_by(**filter_by)
-            .values(values)
-            .returning(self.model)
-        )
+        update_stmt = update(self.model).filter_by(**filter_by).values(values).returning(self.model)
         result = await self.session.execute(update_stmt)
         model = result.scalar_one()
         return self.mapper.map_to_domain_entity(model)

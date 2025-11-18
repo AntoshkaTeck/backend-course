@@ -6,7 +6,9 @@ from src.exceptions import (
     RoomNotFoundException,
     RoomNotFoundHTTPException,
     AllRoomsAreBookedException,
-    AllRoomsAreBookedHTTPException, ExpiredTokenException, ExpiredTokenHTTPException,
+    AllRoomsAreBookedHTTPException,
+    ExpiredTokenException,
+    ExpiredTokenHTTPException,
 )
 
 
