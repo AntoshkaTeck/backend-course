@@ -9,9 +9,9 @@ class RedisConnector:
         self.redis = None
 
     async def connect(self):
-        logging.info(f"Connecting to Redis {self.host}...")
+        logging.info(f"Соединение с Redis {self.host}...")
         self.redis = await redis.Redis(host=self.host, port=self.port)
-        logging.info(f"Connected to Redis {self.host}.")
+        logging.info(f"Соединен с Redis {self.host}.")
 
     async def set(self, key: str, value: str, expire: int | None = None):
         if expire:
