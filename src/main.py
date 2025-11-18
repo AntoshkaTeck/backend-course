@@ -1,18 +1,11 @@
 from contextlib import asynccontextmanager
 import logging
-import sys
-from pathlib import Path
 
 from fastapi import FastAPI
 from fastapi_cache import FastAPICache
 from fastapi_cache.backends.redis import RedisBackend
 
 from src.api.exception_handlers import register_exception_handlers
-
-sys.path.append(str(Path(__file__).parent.parent))  # noqa: E402
-
-logging.basicConfig(level=logging.INFO)
-
 from src.api.hotels import router as router_hotels
 from src.api.rooms import router as router_rooms
 from src.api.auth import router as router_auth

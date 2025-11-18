@@ -5,14 +5,15 @@ from pydantic import BaseModel
 from sqlalchemy import select, delete, update, insert
 from sqlalchemy.exc import IntegrityError, NoResultFound
 
+from src.database import Base
 from src.exceptions import ObjectNotFoundException, ObjectAlreadyExistsException, ObjectEmptyFieldsException, \
     ObjectLinkNotFoundException
 from src.repositories.mappers.base import DataMapper
 
 
 class BaseRepository:
-    model = None
-    mapper: DataMapper = None
+    model: type[Base]
+    mapper: type[DataMapper]
 
     def __init__(self, session):
         self.session = session
@@ -50,13 +51,13 @@ class BaseRepository:
             return self.mapper.map_to_domain_entity(model)
         except IntegrityError as ex:
             logging.exception(f"Не удалось добавить данные в БД, входные данные: {data=}")
-            if isinstance(ex.orig.__cause__, UniqueViolationError):
+            cause = getattr(ex.orig, "__cause__", None)
+            if isinstance(cause, UniqueViolationError):
                 raise ObjectAlreadyExistsException from ex
-            else:
-                logging.exception(
-                    f"Не знакомая ошибка, не удалось добавить данные в БД, входные данные: {data=}"
-                )
-                raise ex
+            logging.exception(
+                f"Не знакомая ошибка, не удалось добавить данные в БД, входные данные: {data=}"
+            )
+            raise ex
 
     async def add_bulk(self, data: list[BaseModel]):
         try:
@@ -64,7 +65,8 @@ class BaseRepository:
             await self.session.execute(add_stmt)
         except IntegrityError as ex:
             # ловим конкретно FK violation от asyncpg
-            if isinstance(ex.orig.__cause__, ForeignKeyViolationError):
+            cause = getattr(ex.orig, "__cause__", None)
+            if isinstance(cause, ForeignKeyViolationError):
                 raise ObjectLinkNotFoundException from ex
 
     async def update(self, data: BaseModel, exclude_unset: bool = False, **filter_by):

@@ -38,6 +38,11 @@ docker run -d \
     redis-server --appendonly yes
 
 # CI/CD
+docker run -d --name gitlab-runner --restart always \
+    -v /srv/gitlab-runner/config:/etc/gitlab-runner \
+    -v /var/run/docker.sock:/var/run/docker.sock \
+    gitlab/gitlab-runner:alpine
+
 docker run --rm -it -v /srv/gitlab-runner/config:/etc/gitlab-runner gitlab/gitlab-runner:alpine register
     -> docker
     -> docker:dind

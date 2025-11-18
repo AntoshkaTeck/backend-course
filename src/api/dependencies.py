@@ -1,6 +1,6 @@
 from typing import Annotated
 
-from fastapi import Depends, Query, HTTPException, Request
+from fastapi import Depends, Query, Request
 from pydantic import BaseModel
 
 from src.database import async_session_maker, async_session_maker_null_pool
