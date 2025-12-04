@@ -3,28 +3,29 @@ import redis.asyncio as redis
 
 
 class RedisConnector:
+    _redis: redis.Redis
+
     def __init__(self, host: str, port: int) -> None:
         self.host = host
         self.port = port
-        self.redis = None
 
     async def connect(self):
         logging.info(f"Соединение с Redis {self.host}...")
-        self.redis = await redis.Redis(host=self.host, port=self.port)
+        self._redis = await redis.Redis(host=self.host, port=self.port)
         logging.info(f"Соединен с Redis {self.host}.")
 
     async def set(self, key: str, value: str, expire: int | None = None):
         if expire:
-            await self.redis.set(key, value, ex=expire)
+            await self._redis.set(key, value, ex=expire)
         else:
-            await self.redis.set(key, value)
+            await self._redis.set(key, value)
 
     async def get(self, key: str):
-        return await self.redis.get(key)
+        return await self._redis.get(key)
 
     async def delete(self, key: str):
-        await self.redis.delete(key)
+        await self._redis.delete(key)
 
     async def close(self):
-        if self.redis:
-            await self.redis.close()
+        if self._redis:
+            await self._redis.close()

@@ -11,36 +11,36 @@ from src.schemas.rooms import Room, RoomWithRels
 from src.schemas.users import User
 
 
-class HotelDataMapper(DataMapper):
+class HotelDataMapper(DataMapper[HotelsOrm, Hotel]):
     db_model = HotelsOrm
     schema = Hotel
 
 
-class RoomDataMapper(DataMapper):
+class RoomDataMapper(DataMapper[RoomsOrm, Room]):
     db_model = RoomsOrm
     schema = Room
 
 
-class RoomWithRelsDataMapper(DataMapper):
+class RoomWithRelsDataMapper(DataMapper[RoomsOrm, RoomWithRels]):
     db_model = RoomsOrm
     schema = RoomWithRels
 
 
-class UserDataMapper(DataMapper):
+class UserDataMapper(DataMapper[UsersOrm, User]):
     db_model = UsersOrm
     schema = User
 
 
-class BookingDataMapper(DataMapper):
+class BookingDataMapper(DataMapper[BookingsOrm, Booking]):
     db_model = BookingsOrm
     schema = Booking
 
 
-class FacilityDataMapper(DataMapper):
+class FacilityDataMapper(DataMapper[FacilitiesOrm, Facility]):
     db_model = FacilitiesOrm
     schema = Facility
 
 
-class RoomFacilityDataMapper(DataMapper):
+class RoomFacilityDataMapper(DataMapper[RoomsFacilitiesOrm, RoomFacility]):
     db_model = RoomsFacilitiesOrm
     schema = RoomFacility

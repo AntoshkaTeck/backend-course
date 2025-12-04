@@ -30,7 +30,7 @@ def get_token(request: Request) -> str:
 
 def get_current_user_id(token: str = Depends(get_token)) -> int:
     try:
-        data = AuthService().decode_token(token)
+        data = AuthService.decode_token(token)
     except InvalidTokenException:
         raise InvalidTokenHTTPException
     return data["user_id"]

@@ -10,4 +10,4 @@ def upload_image(
     file: UploadFile,
     background_tasks: BackgroundTasks,  # Не круто - медленно!
 ):
-    ImageService().upload_image(file=file, background_tasks=background_tasks)
+    ImageService.upload_image(file=file, background_tasks=background_tasks)

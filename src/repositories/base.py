@@ -1,4 +1,5 @@
 import logging
+from typing import TypeVar, Generic, Sequence
 
 from asyncpg import UniqueViolationError, ForeignKeyViolationError
 from pydantic import BaseModel
@@ -15,9 +16,13 @@ from src.exceptions import (
 from src.repositories.mappers.base import DataMapper
 
 
-class BaseRepository:
-    model: type[Base]
-    mapper: type[DataMapper]
+DBModel = TypeVar("DBModel", bound=Base)
+Schema = TypeVar("Schema", bound=BaseModel)
+
+
+class BaseRepository(Generic[DBModel, Schema]):
+    model: type[DBModel]
+    mapper: type[DataMapper[DBModel, Schema]]
 
     def __init__(self, session):
         self.session = session
@@ -63,7 +68,7 @@ class BaseRepository:
             )
             raise ex
 
-    async def add_bulk(self, data: list[BaseModel]):
+    async def add_bulk(self, data: Sequence[BaseModel]):
         try:
             add_stmt = insert(self.model).values([item.model_dump() for item in data])
             await self.session.execute(add_stmt)

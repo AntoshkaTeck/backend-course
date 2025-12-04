@@ -24,5 +24,5 @@ def upgrade() -> None:
 
 
 def downgrade() -> None:
-    op.drop_constraint(None, "rooms", type_="foreignkey")
+    op.drop_constraint(None, "rooms", type_="foreignkey")  # pyright: ignore
     op.create_foreign_key(op.f("rooms_hotel_id_fkey"), "rooms", "hotels", ["hotel_id"], ["id"])

@@ -6,14 +6,15 @@ from src.exceptions import ObjectLinkNotFoundException
 from src.models.facilities import FacilitiesOrm, RoomsFacilitiesOrm
 from src.repositories.base import BaseRepository
 from src.repositories.mappers.mappers import FacilityDataMapper, RoomFacilityDataMapper
+from src.schemas.facilities import Facility, RoomFacility
 
 
-class FacilitiesRepository(BaseRepository):
+class FacilitiesRepository(BaseRepository[FacilitiesOrm, Facility]):
     model = FacilitiesOrm
     mapper = FacilityDataMapper
 
 
-class RoomsFacilitiesRepository(BaseRepository):
+class RoomsFacilitiesRepository(BaseRepository[RoomsFacilitiesOrm, RoomFacility]):
     model = RoomsFacilitiesOrm
     mapper = RoomFacilityDataMapper
 
@@ -37,6 +38,7 @@ class RoomsFacilitiesRepository(BaseRepository):
                 )
                 await self.session.execute(insert_m2m_facilities_stmt)
             except IntegrityError as ex:
+                cause = getattr(ex, "__cause__", None)
                 # ловим конкретно FK violation от asyncpg
-                if isinstance(ex.orig.__cause__, ForeignKeyViolationError):
+                if isinstance(cause, ForeignKeyViolationError):
                     raise ObjectLinkNotFoundException from ex

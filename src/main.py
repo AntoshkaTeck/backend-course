@@ -19,7 +19,7 @@ from src.init import redis_connector
 async def lifespan(_: FastAPI):
     # При старте проекта
     await redis_connector.connect()
-    FastAPICache.init(RedisBackend(redis_connector.redis), prefix="fastapi-cache")
+    FastAPICache.init(RedisBackend(redis_connector._redis), prefix="fastapi-cache")
     logging.info("FastAPI Cache initialized")
     yield
     await redis_connector.close()

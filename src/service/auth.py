@@ -24,7 +24,8 @@ class AuthService(BaseService):
     def verify_password(self, plain_password, hashed_password) -> bool:
         return self.password_hash.verify(plain_password, hashed_password)
 
-    def create_access_token(self, data: dict) -> str:
+    @staticmethod
+    def create_access_token(data: dict) -> str:
         to_encode = data.copy()
         expire = datetime.now(timezone.utc) + timedelta(
             minutes=settings.JWT_ACCESS_TOKEN_EXPIRE_MINUTES
@@ -38,7 +39,8 @@ class AuthService(BaseService):
     def hash_password(self, password: str) -> str:
         return self.password_hash.hash(password)
 
-    def decode_token(self, token: str) -> dict:
+    @staticmethod
+    def decode_token(token: str) -> dict:
         try:
             return jwt.decode(token, settings.JWT_SECRET_KEY, algorithms=[settings.JWT_ALGORITHM])
         except jwt.exceptions.InvalidSignatureError:

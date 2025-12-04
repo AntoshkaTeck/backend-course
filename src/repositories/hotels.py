@@ -8,9 +8,10 @@ from src.repositories.base import BaseRepository
 from src.models.hotels import HotelsOrm
 from src.repositories.mappers.mappers import HotelDataMapper
 from src.repositories.utils import rooms_ids_for_booking
+from src.schemas.hotels import Hotel
 
 
-class HotelsRepository(BaseRepository):
+class HotelsRepository(BaseRepository[HotelsOrm, Hotel]):
     model = HotelsOrm
     mapper = HotelDataMapper
 
@@ -18,8 +19,8 @@ class HotelsRepository(BaseRepository):
         self,
         date_from: date,
         date_to: date,
-        location: str,
-        title: str,
+        location: str | None,
+        title: str | None,
         limit: int,
         offset: int,
     ):

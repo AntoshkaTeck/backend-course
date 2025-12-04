@@ -11,5 +11,5 @@ class FacilityService(BaseService):
         facility = await self.db.facilities.add(facility_data)
         await self.db.commit()
 
-        test_task.delay()
+        test_task.delay()  # type: ignore[attr-defined]
         return facility
